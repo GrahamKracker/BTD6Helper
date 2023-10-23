@@ -6,6 +6,6 @@ public class NoModHelper : Error
 
     public override bool AffectsLog(string log, SocketMessage message)
     {
-        return log.Contains("SHA256 Hash") && log.Contains("Melon Assembly loaded") && !log.Contains("Btd6ModHelper");
+        return log.Contains("SHA256 Hash") && log.Contains("Melon Assembly loaded") && log.Contains("Loading Mods from") && !log.Contains("Btd6ModHelper");
     }
 }

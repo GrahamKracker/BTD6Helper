@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Configurations>Debug;Release</Configurations>
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
@@ -12,10 +11,12 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <Optimize>false</Optimize>
         <DebugType>embedded</DebugType>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <Optimize>true</Optimize>
         <DebugType>none</DebugType>
+        <OutputType>WinExe</OutputType>
     </PropertyGroup>
     
     <ItemGroup>

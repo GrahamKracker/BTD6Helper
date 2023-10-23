@@ -14,19 +14,19 @@ public partial class OutdatedMods : Error
         foreach (Match match in MissingDependenciesRegex().Matches(log))
         {
             found = true;
-            stringBuilder.Append($"`{match.Groups[1].Value}` is outdated and will not work. Make sure to check mod browser or the modding servers for a new version.\n- ");
+            stringBuilder.Append($"`{match.Groups[1].Value}` is outdated and will not work. Make sure to check mod browser or the modding servers for a new version. Reinstalling MelonLoader with your antivirus turned off **may** help fix the issue.\n- ");
         }
         
         foreach (Match match in TypeLoadRegex().Matches(log))
         {
             found = true;
-            stringBuilder.Append($"`{match.Groups[1].Value}` is outdated and will not work. Make sure to check mod browser or the modding servers for a new version.\n- ");
+            stringBuilder.Append($"`{match.Groups[1].Value}` is outdated and will not work. Make sure to check mod browser or the modding servers for a new version. Reinstalling MelonLoader with your antivirus turned off **may** help fix the issue.\n- ");
         }
         
         foreach (Match match in AssemblyLoadRegex().Matches(log))
         {
             found = true;
-            stringBuilder.Append($"`{match.Groups[1].Value}` failed to load and will not work. Make sure to check mod browser or the modding servers for a new version.\n- ");
+            stringBuilder.Append($"`{match.Groups[1].Value}` failed to load and will not work. Make sure to check mod browser or the modding servers for a new version. Reinstalling MelonLoader with your antivirus turned off **may** help fix the issue.\n- ");
         }
 
         _message = stringBuilder.ToString();

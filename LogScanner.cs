@@ -4,14 +4,22 @@ namespace BTD6Helper;
 
 public sealed partial class LogScanner
 {
-    #region Static Fields/Methods
     private static readonly AllowedMentions AllowedMentions = new(AllowedMentionTypes.None);
-    private static readonly HashSet<Error> AllErrors = Assembly.GetExecutingAssembly().GetValidTypes().Where(type => type.BaseType == typeof(Error) && CanLoadType(type)).Select(type => (Error) Activator.CreateInstance(type)!).ToHashSet();
-    private static readonly HashSet<Suggestion> AllSuggestions = Assembly.GetExecutingAssembly().GetValidTypes().Where(type => type.BaseType == typeof(Suggestion) && CanLoadType(type)).Select(type => (Suggestion) Activator.CreateInstance(type)!).OrderBy(suggestion => suggestion.Priority).ToHashSet();
-    
-    private static bool CanLoadType(Type type) => type is { IsAbstract: false, ContainsGenericParameters: false } && type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null) != null;
-    #endregion
-    
+
+    private static readonly HashSet<Error> AllErrors = Assembly.GetExecutingAssembly().GetValidTypes()
+        .Where(type => type.BaseType == typeof(Error) && CanLoadType(type))
+        .Select(type => (Error)Activator.CreateInstance(type)!).ToHashSet();
+
+    private static readonly HashSet<Suggestion> AllSuggestions = Assembly.GetExecutingAssembly().GetValidTypes()
+        .Where(type => type.BaseType == typeof(Suggestion) && CanLoadType(type))
+        .Select(type => (Suggestion)Activator.CreateInstance(type)!).OrderBy(suggestion => suggestion.Priority)
+        .ToHashSet();
+
+    private static bool CanLoadType(Type type) => type is { IsAbstract: false, ContainsGenericParameters: false } &&
+        type.GetConstructor(
+        BindingFlags.Instance | BindingFlags.Public |
+        BindingFlags.NonPublic, null, Type.EmptyTypes, null) != null;
+
     #region Colors
     private static readonly Color NoIssueColor = new(0x00ff00);
     private static readonly Color SuggestionColor = new(0xffff00);
@@ -28,13 +36,11 @@ public sealed partial class LogScanner
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public LogScanner(string log, SocketMessage message)
     {
-        var lines = log.Split('\n');
+        var lines = log.Split('\n').SkipWhile(line => !line.Contains("Loading Mods from")).ToArray();
         
-        for(var i = 0; i < lines.Length; i++)
+        for(var i = 0; i < lines.Length - 2; i++)
         {
             var line = lines[i];
-            if(i + 2 >= lines.Length)
-                break;
             var versionMatch = VersionRegex().Match(line);
             var authorMatch = AuthorRegex().Match(lines[i + 1]);
             var dllMatch = DllRegex().Match(lines[i + 2]);
@@ -77,7 +83,6 @@ public sealed partial class LogScanner
             Color = color,
             Timestamp = DateTimeOffset.UtcNow,
         };
-        
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,7 +91,7 @@ public sealed partial class LogScanner
         _embedBuilder.Footer = new EmbedFooterBuilder
         {
             Text =
-                $"Created by GrahamKracker and Timotheeee1 | {_mods.Count} {(_mods.Count == 1 ? "mod" : "mods")} detected"
+                $"Created by GrahamKracker and Timotheeee1 | {_mods.Count} mod{(_mods.Count == 1 ? "" : "s")} detected"
         };
         
         if (_errors.Count > 0)
@@ -110,16 +115,17 @@ public sealed partial class LogScanner
             var mods = _mods.Select<Mod, string>(mod => mod.ToString()).Aggregate((a, b) =>
             {
                 b = $"\n- {b}";
-                if (a.Length + b.Length > EmbedFieldBuilder.MaxFieldValueLength - 2 - "Too many mods to list, please check the log.".Length)
+                const string tooManyMods = "**Too many mods to list, please check the log.**";
+                if (a.Length + b.Length > EmbedFieldBuilder.MaxFieldValueLength - 2 - tooManyMods.Length)
                 {
-                    return a.Contains("Too many mods to list, please check the log.") ? a : $"{a}\n- Too many mods to list, please check the log.";
+                    return a.Contains(tooManyMods) ? a : $"{a}\n- {tooManyMods}";
                 }
                 return a + b;
             });
             _embedBuilder.AddField("Mods: ",
                 $"- {mods}");
         }
-        
+
         _message.Channel.SendMessageAsync(messageReference: new MessageReference(_message.Id),
             allowedMentions: AllowedMentions, embed:_embedBuilder.Build());
     }
@@ -136,7 +142,7 @@ public sealed partial class LogScanner
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static partial Regex AuthorRegex();
 
-    [GeneratedRegex(@" (.*) v(\d+\.\d+\.\d+)")]
+    [GeneratedRegex(@" (.*?) v(\d+\.\d+\.\d+)")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static partial Regex VersionRegex();
 }

@@ -1,7 +1,7 @@
 ﻿namespace BTD6Helper;
 
 public abstract class Error
-{
+{ 
     protected virtual bool ShouldAppendNewline => true;
     protected abstract string Message { get; }
     

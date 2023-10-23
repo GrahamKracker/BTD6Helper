@@ -36,7 +36,7 @@ public static class Program
         
         MainTask().GetAwaiter().GetResult();
     }
-
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static async Task MainTask()
     {
@@ -44,17 +44,29 @@ public static class Program
         {
             await Client.StartAsync().ConfigureAwait(false);
         });
-
-        // Block the program until it is closed.
+        
         await Task.Delay(Timeout.Infinite).ConfigureAwait(false);
     }
+
+    static readonly HashSet<ulong> NonNexusRoles = new()
+    {
+        519890781260087298, //Owner
+        504787304678948878, //Admins
+        504790435043082244, //Staff Team
+        504788177853087744, //Modders
+    };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Task MessageReceivedAsync(SocketMessage message)
     {
-        // The bot should never respond to itself or another bot.
         if (message.Author.IsBot)
             return Task.CompletedTask;
+
+        if (message.Content.Contains("nexus", StringComparison.InvariantCultureIgnoreCase) && message.Author is SocketGuildUser guildUser && !guildUser.Roles.Any(role => NonNexusRoles.Contains(role.Id)))
+        {
+            _ = message.Channel.SendMessageAsync(messageReference: new MessageReference(message.Id), text: "Do not use nexus, you will not receive help with it, most of the mods are outdated and broken, or stolen. Use mods from this server or the mod browser instead.");
+            return Task.CompletedTask;
+        }
         
         switch (message.Content)
         {
@@ -78,8 +90,16 @@ public static class Program
             {
                 return Task.CompletedTask;
             }
+
+            try
+            {
+                new LogScanner(log, message).PerformScan();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             
-            new LogScanner(log, message).PerformScan();
             return Task.CompletedTask;
         }, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.RunContinuationsAsynchronously);
         
@@ -88,4 +108,6 @@ public static class Program
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsLog(string log) => log.Contains("MelonLoader v") && log.Contains("BloonsTD6");
+    
+    
 }
