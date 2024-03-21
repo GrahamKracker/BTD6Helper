@@ -29,7 +29,7 @@ public sealed partial class LogScanner
     private readonly List<Error> _errors;
     private readonly List<Suggestion> _suggestions;
 
-    private readonly HashSet<Mod> _mods = new();
+    private readonly HashSet<Mod> _mods = [];
     private readonly SocketMessage _message;
     private readonly EmbedBuilder _embedBuilder;
     

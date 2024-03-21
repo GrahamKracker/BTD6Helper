@@ -1,17 +1,17 @@
 ﻿namespace BTD6Helper;
 
-public sealed record Mod(string? Name, string? Version, string? Author, string Assembly)
+public readonly struct Mod(string? name, string? version, string? author, string assembly)
 {
-    public string? Name { get; } = Name;
-    public string? Author { get; } = Author;
-    public string? Version { get; } = Version;
-    public string Assembly { get; } = Assembly;
+    private string? Name { get; } = name;
+    private string? Author { get; } = author;
+    private string? Version { get; } = version;
+    private string Assembly { get; } = assembly;
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append(Name?? Assembly);
+        sb.Append(Name ?? Assembly);
         if (Version != null)
             sb.Append($" v{Version}");
         if (Author != null)
